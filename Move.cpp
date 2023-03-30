@@ -23,22 +23,24 @@ Move::Move(string commandString) : Move() {
     if(commandString == "S") {
         isSave = true;
     }
-    if(commandString == "Q") {
+    else if(commandString == "Q") {
         isQuit = true;
     }
-    if(commandString == "") {
+    else if(commandString == "") {
         isPass = true;
     }
-    stringstream ss(commandString);
-    char junk;
-    ss >> junk;
-    ss >> elevatorId;
-    ss >> junk;
-    if(commandString.at(2) == 'f') {
-        ss >> targetFloor;
-    }
-    else if(commandString.at(2) == 'p') {
-        isPickup = true;
+    else {
+        stringstream ss(commandString);
+        char junk;
+        ss >> junk;
+        ss >> elevatorId;
+        ss >> junk;
+        if(commandString.at(2) == 'f') {
+            ss >> targetFloor;
+        }
+        else if(commandString.at(2) == 'p') {
+            isPickup = true;
+        }
     }
 }
 
@@ -68,6 +70,19 @@ bool Move::isValidMove(Elevator elevators[NUM_ELEVATORS]) const {
 
 void Move::setPeopleToPickup(const string& pickupList, const int currentFloor, const Floor& pickupFloor) {
     //TODO: Implement setPeopleToPickup
+    numPeopleToPickup = 0;
+    totalSatisfaction = 0;
+        for(int i = 0; i < pickupList.length(); i++) {
+        peopleToPickup[i] = pickupList.at(i);
+        numPeopleToPickup++;
+        int anger  = pickupFloor.getPersonByIndex(peopleToPickup[i]).getAngerLevel();
+        totalSatisfaction = totalSatisfaction + (MAX_ANGER - anger);
+        int target = pickupFloor.getPersonByIndex(peopleToPickup[i]).getTargetFloor();
+        if(abs(target - currentFloor) > (targetFloor - currentFloor)) {
+            targetFloor = target;
+        }
+    }
+    
 }
 
 //////////////////////////////////////////////////////
