@@ -20,11 +20,48 @@ using namespace std;
 
 Move::Move(string commandString) : Move() {
     //TODO: Implement non-default constructor
+    if(commandString == "S") {
+        isSave = true;
+    }
+    if(commandString == "Q") {
+        isQuit = true;
+    }
+    if(commandString == "") {
+        isPass = true;
+    }
+    stringstream ss(commandString);
+    char junk;
+    ss >> junk;
+    ss >> elevatorId;
+    ss >> junk;
+    if(commandString.at(2) == 'f') {
+        ss >> targetFloor;
+    }
+    else if(commandString.at(2) == 'p') {
+        isPickup = true;
+    }
 }
 
 bool Move::isValidMove(Elevator elevators[NUM_ELEVATORS]) const {
     //TODO: Implement isValidMove
-    
+    if(isSave || isQuit || isPass) {
+       return true;
+    }
+    if(isPickupMove()) {
+        if(0<= elevatorId && elevatorId < NUM_ELEVATORS &&
+           !elevators[elevatorId].isServicing()) {
+            return true;
+        }
+    }
+    else {
+        if(0 <= elevatorId && elevatorId < NUM_ELEVATORS && 0 <= targetFloor &&
+           targetFloor < NUM_FLOORS) {
+            if(elevators[elevatorId].getCurrentFloor() !=
+               elevators[elevatorId].getTargetFloor()) {
+                return true;
+            }
+        }
+    }
     //Returning false to prevent compilation error
     return false;
 }

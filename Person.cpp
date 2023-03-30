@@ -19,17 +19,31 @@ using namespace std;
 
 Person::Person(string inputString) : Person() {
     //TODO: Implement non-default constructor
+    stringstream ss(inputString);
+    char junk;
+    ss >> turn;
+    ss >> junk;
+    ss >> currentFloor >> junk >> targetFloor >> junk >> angerLevel;
 }
 
 bool Person::tick(int currentTime) {
     //TODO: Implement tick
-
+    if(currentTime % TICKS_PER_ANGER_INCREASE == 0) {
+        angerLevel++;
+    }
+    if(angerLevel >= MAX_ANGER) {
+        angerLevel = MAX_ANGER;
+        return true;
+    }
+    else {
+        return false;
+    }
     //Returning false to prevent compilation error
-    return false;
 }
 
 void Person::print(ostream &outs) {    
     //TODO: Implement print
+    outs << "f" << currentFloor << "t" << targetFloor << "a" << angerLevel << endl;
 }
 
 //////////////////////////////////////////////////////
