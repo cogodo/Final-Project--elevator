@@ -50,7 +50,7 @@ bool Move::isValidMove(Elevator elevators[NUM_ELEVATORS]) const {
        return true;
     }
     if(isPickupMove()) {
-        if(0<= elevatorId && elevatorId < NUM_ELEVATORS &&
+        if(0 <= elevatorId && elevatorId < NUM_ELEVATORS &&
            !elevators[elevatorId].isServicing()) {
             return true;
         }

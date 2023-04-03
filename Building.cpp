@@ -25,12 +25,15 @@ void Building::update(Move move){
     if(move.isPassMove()) {
         return;
     }
-    else if(move.isPickupMove()) {
+    else {
         int x[MAX_PEOPLE_PER_FLOOR];
         move.copyListOfPeopleToPickup(x);
-        elevator
-        floors[0].removePeople(x, sizeof(x));
+        elevators[move.getElevatorId()].serviceRequest(move.getTargetFloor());
+        if(move.isPickupMove()) {
+            floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(x, sizeof(x));
+        }
     }
+
 }
 
 int Building::tick(Move move){
