@@ -24,6 +24,10 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     std::uniform_int_distribution<> floorDist(0, 9);
     std::uniform_int_distribution<> angerDist(0, 3);
 
+    if (!gameFile.is_open()) {
+        exit(1);
+    }
+
     isAIMode = isAIModeIn;
     printGameStartPrompt();
     initGame(gameFile);
@@ -50,6 +54,51 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
 // Stub for isValidPickupList for Core
 // You *must* revise this function according to the RME and spec
 bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum) const {
+
+    for (int i = 0; i < pickupList.length(); i++) {
+        
+        for (int j = 0; j < pickupList.length(); j++) {
+            
+            if (pickupList[i] == pickupList[j] && j != i) {
+                return false;
+            
+            }
+        }
+
+        if (pickupList[i] < '0' && pickupList[i] > '9') {
+            return false;
+        }
+
+        if ((pickupList[i] - '0') > building.getFloorByFloorNum(
+                pickupFloorNum).getNumPeople()) {
+            return false;
+        }
+
+    }
+
+    if (pickupList.length() > ELEVATOR_CAPACITY) {
+        return false;
+    }
+
+    if (building.getFloorByFloorNum(pickupFloorNum).getPersonByIndex(
+        pickupList[0] - '0').getTargetFloor() > pickupFloorNum) {
+        for (int i = 0; i < pickupList.length(); i++) {
+            if (building.getFloorByFloorNum(pickupFloorNum).getPersonByIndex(
+                pickupList[i] - '0').getTargetFloor() < pickupFloorNum) {
+                return false;
+            }
+        }
+    }
+    else if (building.getFloorByFloorNum(pickupFloorNum).getPersonByIndex(
+        pickupList[0] - '0').getTargetFloor() < pickupFloorNum) {
+        for (int i = 0; i < pickupList.length(); i++) {
+            if (building.getFloorByFloorNum(pickupFloorNum).getPersonByIndex(
+                pickupList[i] - '0').getTargetFloor() > pickupFloorNum) {
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 
