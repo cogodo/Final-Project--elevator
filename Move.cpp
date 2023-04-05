@@ -45,42 +45,45 @@ Move::Move(string commandString) : Move() {
 }
 
 bool Move::isValidMove(Elevator elevators[NUM_ELEVATORS]) const {
-    //TODO: Implement isValidMove
-    if(isSave || isQuit || isPass) {
-       return true;
+    if (isPass || isSave || isQuit) {
+        
+        return true;
     }
-    else if(0 <= elevatorId && elevatorId < NUM_ELEVATORS &&
-            !elevators[elevatorId].isServicing()) {
-        if(isPickupMove()) {
+    
+    else if ((0 <= elevatorId) && (elevatorId < NUM_ELEVATORS) && !(elevators[elevatorId].isServicing())) {
+        
+        if (isPickupMove()) {
+            
             return true;
         }
-        else if( 0 <= targetFloor && targetFloor < NUM_FLOORS) {
-            if(elevators[elevatorId].getCurrentFloor() !=
-               elevators[elevatorId].getTargetFloor()) {
-                return true;
-            }
+        
+        else if ((0 <= targetFloor) && (targetFloor < NUM_FLOORS) && (elevators[elevatorId].getTargetFloor() != elevators[elevatorId].getCurrentFloor())) {
+            
+            return true;
+
         }
     }
-    //Returning false to prevent compilation error
+    
     return false;
 }
 
 void Move::setPeopleToPickup(const string& pickupList, const int currentFloor, const Floor& pickupFloor) {
-    //TODO: Implement setPeopleToPickup
     numPeopleToPickup = 0;
     totalSatisfaction = 0;
     targetFloor = pickupFloor.getPersonByIndex(peopleToPickup[0]).getTargetFloor();
-        for(int i = 0; i < pickupList.length(); i++) {
+    
+    for (int i = 0; i < pickupList.length(); i++) {
         peopleToPickup[i] = (pickupList.at(i)) - 48;
         numPeopleToPickup++;
-        int anger  = pickupFloor.getPersonByIndex(peopleToPickup[i]).getAngerLevel();
+        
+        int anger = pickupFloor.getPersonByIndex(peopleToPickup[i]).getAngerLevel();
         totalSatisfaction = totalSatisfaction + (MAX_ANGER - anger);
+        
         int target = pickupFloor.getPersonByIndex(peopleToPickup[i]).getTargetFloor();
-        if(abs(target - currentFloor) > (abs(targetFloor - currentFloor))) {
+        if (abs(target - currentFloor) > abs((targetFloor - currentFloor))) {
             targetFloor = target;
         }
     }
-    
 }
 
 //////////////////////////////////////////////////////
