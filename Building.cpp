@@ -30,7 +30,7 @@ void Building::update(Move move){
         move.copyListOfPeopleToPickup(x);
         elevators[move.getElevatorId()].serviceRequest(move.getTargetFloor());
         if(move.isPickupMove()) {
-            floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(x, sizeof(x));
+            floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(x, move.getNumPeopleToPickup());
         }
     }
 

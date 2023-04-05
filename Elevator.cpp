@@ -18,15 +18,15 @@ using namespace std;
 void Elevator::tick(int currentTime) {
 
     if (currentTime % TICKS_PER_ELEVATOR_MOVE == 0 && servicing) {
-        int dif;
         if (targetFloor < currentFloor) {
-            dif = -1;
+            currentFloor--;
         }
-        else {
-            dif = 1;
+        else if (targetFloor > currentFloor) {
+            currentFloor++;
         }
-        currentFloor += dif;
-        servicing = currentFloor != targetFloor;
+        if (targetFloor == currentFloor) {
+            servicing = false;
+        }
     }
 }
 

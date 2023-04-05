@@ -19,8 +19,8 @@ using namespace std;
 int Floor::tick(int currentTime) {
     //TODO: Implement tick
     int count = 0;
-    int indices[MAX_PEOPLE_PER_FLOOR] {0,0,0,0,0,0,0,0,0,0};
-    for(int i = 0; i < MAX_PEOPLE_PER_FLOOR; i++) {
+    int indices[MAX_PEOPLE_PER_FLOOR] = {0};
+    for(int i = 0; i < numPeople; i++) {
         if(people[i].tick(currentTime)){
             indices[count] = i;
             count++;

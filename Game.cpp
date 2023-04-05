@@ -56,10 +56,12 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
         string line = "";
         while (gameFile >> line) {
             if (line[0] - '0' < 10) {
-                for (int i = 0; i < 10; i++) {
-                    if (line[0] - '0' == i) {
-                        Person p(line);
-                        building.spawnPerson(p);
+                if (line[1] == 'f') {
+                    for (int i = 0; i < 10; i++) {
+                        if (line[0] - '0' == i) {
+                            Person p(line);
+                            building.getFloorByFloorNum(p.getCurrentFloor()).addPerson(p, p.getTargetFloor());
+                        }
                     }
                 }
             }
@@ -67,26 +69,13 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
                 for (int i = 0; i < 10; i++) {
                     while (line[1] - '0' == i) {
                         Person p(line);
-                        building.spawnPerson(p);
+                        building.getFloorByFloorNum(p.getCurrentFloor()).addPerson(p, p.getTargetFloor());
                     }
                 }
             }
-            building.prettyPrintBuilding(cout);
-            satisfactionIndex.printSatisfaction(cout, false);
-            checkForGameEnd();
 
-            Move nextMove = getMove();
-            update(nextMove);
         }
         while (true) {
-            int src = floorDist(gen);
-            int dst = floorDist(gen);
-            if (src != dst) {
-                std::stringstream ss;
-                ss << "0f" << src << "t" << dst << "a" << angerDist(gen);
-                Person p(ss.str());
-                building.spawnPerson(p);
-            }
 
             building.prettyPrintBuilding(cout);
             satisfactionIndex.printSatisfaction(cout, false);
@@ -94,7 +83,13 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
 
             Move nextMove = getMove();
             update(nextMove);
-            
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j < building.getFloorByFloorNum(i).getNumPeople(); j++) {
+                    if (building.getFloorByFloorNum(i).getPersonByIndex(j).getTurn() == (building.getTime() - 1)) {
+                        building.spawnPerson(building.getFloorByFloorNum(i).getPersonByIndex(j));
+                    }
+                }
+            }
         }
     }
 }
@@ -117,7 +112,7 @@ bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum)
             return false;
         }
 
-        if ((pickupList[i] - '0') > building.getFloorByFloorNum(
+        if ((pickupList[i] - '0') >= building.getFloorByFloorNum(
                 pickupFloorNum).getNumPeople()) {
             return false;
         }
