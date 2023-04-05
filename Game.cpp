@@ -32,22 +32,70 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     printGameStartPrompt();
     initGame(gameFile);
 
-    while (true) {
-        int src = floorDist(gen);
-        int dst = floorDist(gen);
-        if (src != dst) {
-            std::stringstream ss;
-            ss << "0f" << src << "t" << dst << "a" << angerDist(gen);
-            Person p(ss.str());
-            building.spawnPerson(p);
+    if (isAIMode) {
+        while (true) {
+            int src = floorDist(gen);
+            int dst = floorDist(gen);
+            if (src != dst) {
+                std::stringstream ss;
+                ss << "0f" << src << "t" << dst << "a" << angerDist(gen);
+                Person p(ss.str());
+                building.spawnPerson(p);
+            }
+
+            building.prettyPrintBuilding(cout);
+            satisfactionIndex.printSatisfaction(cout, false);
+            checkForGameEnd();
+
+            Move nextMove = getMove();
+            update(nextMove);
         }
+    }
 
-        building.prettyPrintBuilding(cout);
-        satisfactionIndex.printSatisfaction(cout, false);
-        checkForGameEnd();
+    else {
+        string line = "";
+        while (gameFile >> line) {
+            if (line[0] - '0' < 10) {
+                for (int i = 0; i < 10; i++) {
+                    if (line[0] - '0' == i) {
+                        Person p(line);
+                        building.spawnPerson(p);
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < 10; i++) {
+                    while (line[1] - '0' == i) {
+                        Person p(line);
+                        building.spawnPerson(p);
+                    }
+                }
+            }
+            building.prettyPrintBuilding(cout);
+            satisfactionIndex.printSatisfaction(cout, false);
+            checkForGameEnd();
 
-        Move nextMove = getMove();
-        update(nextMove);
+            Move nextMove = getMove();
+            update(nextMove);
+        }
+        while (true) {
+            int src = floorDist(gen);
+            int dst = floorDist(gen);
+            if (src != dst) {
+                std::stringstream ss;
+                ss << "0f" << src << "t" << dst << "a" << angerDist(gen);
+                Person p(ss.str());
+                building.spawnPerson(p);
+            }
+
+            building.prettyPrintBuilding(cout);
+            satisfactionIndex.printSatisfaction(cout, false);
+            checkForGameEnd();
+
+            Move nextMove = getMove();
+            update(nextMove);
+            
+        }
     }
 }
 
