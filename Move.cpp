@@ -12,7 +12,7 @@
  
 #include <cmath>
 #include <sstream>
-#include <stdio.h>      
+#include <stdio.h>
 #include <stdlib.h>
 #include "Move.h"
 
@@ -80,12 +80,11 @@ void Move::setPeopleToPickup(const string& pickupList, const int currentFloor, c
     }
     
     int newIndices[MAX_PEOPLE_PER_FLOOR];
-    int absIndices[pickupList.length()];
+    int absIndices[MAX_PEOPLE_PER_FLOOR];
     for (int j = 0; j < pickupList.length(); j++) {
         newIndices[j] = pickupFloor.getPersonByIndex(peopleToPickup[j]).getTargetFloor();
-        for (int k = 0; k < pickupList.length(); k++) {
-            absIndices[k] = abs(newIndices[j] - currentFloor);
-        }
+       absIndices[j] = abs(newIndices[j] - currentFloor);
+        
     }
     int index = 0;
     int maxValue = 0;
@@ -109,7 +108,7 @@ Move::Move() {
     targetFloor = -1;
     numPeopleToPickup = 0;
     totalSatisfaction = 0;
-	isPass = false;
+    isPass = false;
     isPickup = false;
     isSave = false;
     isQuit = false;
@@ -120,15 +119,15 @@ bool Move::isPickupMove() const {
 }
 
 bool Move::isPassMove() const {
-	return isPass;
+    return isPass;
 }
 
 bool Move::isSaveMove() const {
-	return isSave;
+    return isSave;
 }
 
 bool Move::isQuitMove() const {
-	return isQuit;
+    return isQuit;
 }
 
 int Move::getElevatorId() const {
