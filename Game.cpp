@@ -4,8 +4,8 @@
  * Game.cpp
  * Project UID 28eb18c2c1ce490aada441e65559efdd
  *
- * <#Names#>
- * <#Uniqnames#>
+ * <#Names#> Christopher Sherbenou, Grace Baily, Colin Gordon, Sofia Ryan
+ * <#Uniqnames#> csherben, gbaily, cogo, sofiary
  *
  * Final Project - Elevators
  */
@@ -33,78 +33,87 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     initGame(gameFile);
 
     if (isAIMode) {
+        Person people[999];
+        string line = "";
+        int count = 0;
+        while (gameFile >> line) {
+            if (line.length() > 6) {
+                Person p(line);
+                people[count] = p;
+                count++;
+
+            }
+
+        }
         while (true) {
-            int src = floorDist(gen);
+            /*int src = floorDist(gen);
             int dst = floorDist(gen);
             if (src != dst) {
                 std::stringstream ss;
                 ss << "0f" << src << "t" << dst << "a" << angerDist(gen);
                 Person p(ss.str());
                 building.spawnPerson(p);
+            }*/
+
+            for (int i = 0; i < count; i++) {
+                if (people[i].getTurn() == building.getTime()) {
+                    building.spawnPerson(people[i]);
+                }
             }
 
             building.prettyPrintBuilding(cout);
             satisfactionIndex.printSatisfaction(cout, false);
             checkForGameEnd();
 
-            Move nextMove = getMove();
-            update(nextMove);
+            //Move nextMove = getMove();
+            //update(nextMove);
         }
     }
 
     else {
+        Person people[999];
         string line = "";
+        int count = 0;
         while (gameFile >> line) {
-            if (line[0] - '0' < 10) {
-                if (line[1] == 'f') {
-                    for (int i = 0; i < 10; i++) {
-                        if (line[0] - '0' == i) {
-                            Person p(line);
-                            building.getFloorByFloorNum(p.getCurrentFloor()).addPerson(p, p.getTargetFloor());
-                        }
-                    }
-                }
-            }
-            else {
-                for (int i = 0; i < 10; i++) {
-                    while (line[1] - '0' == i) {
-                        Person p(line);
-                        building.getFloorByFloorNum(p.getCurrentFloor()).addPerson(p, p.getTargetFloor());
-                    }
-                }
+            if (line.length() > 6) {
+                Person p(line);
+                people[count] = p;
+                count++;
+
             }
 
         }
         while (true) {
 
+            for (int i = 0; i < count; i++) {
+                if (people[i].getTurn() == (building.getTime())) {
+                    building.spawnPerson(people[i]);
+                }
+            }
             building.prettyPrintBuilding(cout);
             satisfactionIndex.printSatisfaction(cout, false);
             checkForGameEnd();
 
             Move nextMove = getMove();
             update(nextMove);
-            for (int i = 0; i < 10; i++) {
-                for (int j = 0; j < building.getFloorByFloorNum(i).getNumPeople(); j++) {
-                    if (building.getFloorByFloorNum(i).getPersonByIndex(j).getTurn() == (building.getTime() - 1)) {
-                        building.spawnPerson(building.getFloorByFloorNum(i).getPersonByIndex(j));
-                    }
-                }
-            }
         }
     }
 }
+   
+
+
 
 // Stub for isValidPickupList for Core
 // You *must* revise this function according to the RME and spec
 bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum) const {
 
     for (int i = 0; i < pickupList.length(); i++) {
-        
+
         for (int j = 0; j < pickupList.length(); j++) {
-            
+
             if (pickupList[i] == pickupList[j] && j != i) {
                 return false;
-            
+
             }
         }
 
@@ -113,7 +122,7 @@ bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum)
         }
 
         if ((pickupList[i] - '0') >= building.getFloorByFloorNum(
-                pickupFloorNum).getNumPeople()) {
+            pickupFloorNum).getNumPeople()) {
             return false;
         }
 
