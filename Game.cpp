@@ -99,7 +99,7 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
         }
     }
 }
-   
+
 
 
 
