@@ -16,7 +16,7 @@
 // You do not need to make any changes to this file for the Core
 
 string getAIMoveString(const BuildingState& buildingState) {
- 
+    
     //if there aren't any people to pickup on any floor, do a pass move
     //person shows up, send closest available elevator- if mult people in same direction, pick them all up. . Take side that has higher composite anger
     //keep satisfaction index above 0!
@@ -26,75 +26,138 @@ string getAIMoveString(const BuildingState& buildingState) {
     //Prioritize floors w/ people with higher anger, immediately if angerlevel is 9.
     //Need to develop + implement elevator priority value, currently only using e0
     
-    int compFloorScore = 0;
-    int ticksFromElevator[10];
+    int ticksFromElevator[10][3];
     string move = "";
-    if(buildingState.turn == 0) {
-        return "";
-    }
-    if(buildingState.elevators[0].targetFloor == buildingState.elevators[0].currentFloor) {
-        return "e0p";
+    
+    bool availableElevators[3];
+    for(int z = 0; z < 10; z++) {
+        if(!buildingState.elevators[z].isServicing) {
+            availableElevators[z] = true;
+        }
+        else {
+            availableElevators[z] = false;
+        }
     }
 
-    else {
-        //change elevator priority somehow
-        move = "e0f";
-        for(int i = 0; i < 10; i++) {
-            for(int j = 0; j < 10; j++) {
-                if(buildingState.floors[i].people[j].angerLevel == 9) {
-                    //should work?
-                    move.append(i, 1);
-                    return move;
+    if(availableElevators[0] == false && availableElevators[1] == false && availableElevators[2] == false) {
+        return "";
+            }
+    for(int y = 0; y < 3; y++) {
+        for(int m = 0; m < 10; m++) {
+            int temp = 0;
+            if(buildingState.elevators[y].isServicing) {
+                temp = abs(buildingState.elevators[y].currentFloor - buildingState.elevators[y].targetFloor);
+                ticksFromElevator[m][y] = temp + abs(buildingState.elevators[y].targetFloor - m);
+                ticksFromElevator[m][y] += 1;
+            }
+            else  {
+                ticksFromElevator[m][y] = abs(buildingState.elevators[y].currentFloor - m);
+                //Maybe needed for turn when pickup actually happens?
+                ticksFromElevator[m][y] += 1;
+            }
+        }
+    }
+    
+    int hierarchy[10][3] = {0};
+    
+    for(int w = 0; w < 3; w++) {
+        for(int x = 0; x < 10; x++) {
+            for(int a = 0; a < 10; a++) {
+                if(availableElevators[w]) {
+                    if(buildingState.floors[x].people[a].angerLevel == 9) {
+                        hierarchy[x][w] += 100;
+                    }
+                    else if(buildingState.floors[x].people[a].angerLevel == 8) {
+                        hierarchy[x][w] += 40;
+                    }
+                    else if(buildingState.floors[x].people[a].angerLevel == 7) {
+                        hierarchy[x][w] += 30;
+                    }
+                    else if(buildingState.floors[x].people[a].angerLevel == 6) {
+                        hierarchy[x][w] += 10;
+                    }
+                    else {
+                        hierarchy[x][w] += buildingState.floors[x].people[a].angerLevel;
+                    }
                 }
             }
         }
     }
-    //change elevator priority somehow
-    move = "e0f";
-    //composite score after anger 9s here
-    int seveightComposite[10] = {0,0,0,0,0,0,0,0,0,0};
-   
-    for(int k = 0; k < 10; k++) {
-       
-        for(int l = 0; l < 10; l++) {
-            
-            if(buildingState.floors[k].people[l].angerLevel > 6) {
-                
-                seveightComposite[k] += buildingState.floors[k].people[l].angerLevel;
+    
+    for(int w = 0; w < 3; w++) {
+        for(int x = 0; x < 10; x++) {
+            if(availableElevators[w]) {
+                hierarchy[x][w] = hierarchy[x][w] / ticksFromElevator[x][w];
             }
         }
     }
     
-    for(int m = 0; m < 10; m++) {
-        int temp = 0;
-        if(buildingState.elevators[0].isServicing) {
-            temp = abs(buildingState.elevators[0].currentFloor - buildingState.elevators[0].targetFloor);
-            ticksFromElevator[m] = temp + abs(buildingState.elevators[0].targetFloor - m);
+    int elevatorChoice = 0;
+    int floorChoice = 0;
+    int maxVal = 0;
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 10; j++) {
+            if(availableElevators[i]) {
+                if(hierarchy[j][i] > maxVal) {
+                    maxVal = hierarchy[j][i];
+                    elevatorChoice = i;
+                    floorChoice = j;
+                }
+            }
         }
-        ticksFromElevator[m] = abs(buildingState.elevators[0].currentFloor - m);
-        //Maybe needed for turn when pickup actually happens?
-        ticksFromElevator[m] += 1;
     }
     
-    int floorDanger[10];
-    for(int n = 0; n < 10; n++) {
-        floorDanger[n] = seveightComposite[n] / ticksFromElevator[n];
-    }
-    int max = floorDanger[0];
-    for(int o = 0; o < 9; o++) {
-        if(floorDanger[o + 1] > floorDanger[o]) {
-            max = floorDanger[o + 1];
+    move = "e" + to_string(elevatorChoice) + "f" + to_string(floorChoice);
+    for(int i = 0; i < 3; i++) {
+        if(!buildingState.elevators[i].isServicing) {
+            //Target floor refers to target of previous people
+            if(buildingState.elevators[i].targetFloor == buildingState.elevators[i].currentFloor && buildingState.floors[buildingState.elevators[i].currentFloor].numPeople > 0) {
+                //Won't work without people on floor 0 at start
+                return "e" + to_string(i) + "p";
+            }
         }
+        
     }
-    move.append(max,1);
     return move;
-    
-    
-    //Need more for when there are all low anger levels
-    
 }
 
 string getAIPickupList(const Move& move, const BuildingState& buildingState, 
                        const Floor& floorToPickup) {
-    return "";
+    int numUp = 0;
+    int numDown = 0;
+    int compUpScore = 0;
+    int compDownScore = 0;
+    bool upDown[10];
+
+    //ACCOUNT FOR NINES
+    for(int i = 0; i < floorToPickup.getNumPeople(); i++) {
+        if(floorToPickup.getPersonByIndex(i).getTargetFloor() > floorToPickup.getPersonByIndex(i).getCurrentFloor()) {
+            numUp++;
+            compUpScore += (floorToPickup.getPersonByIndex(i).getTargetFloor() - floorToPickup.getPersonByIndex(i).getCurrentFloor());
+            upDown[i] = true;
+           
+        }
+        else if(floorToPickup.getPersonByIndex(i).getTargetFloor() < floorToPickup.getPersonByIndex(i).getCurrentFloor()) {
+            numDown++;
+            compDownScore += (floorToPickup.getPersonByIndex(i).getCurrentFloor() - floorToPickup.getPersonByIndex(i).getTargetFloor());
+            upDown[i] = false;
+          
+        }
+    }
+    string pplToPickup = "";
+    if(compUpScore > compDownScore) {
+        for(int k = 0; k < floorToPickup.getNumPeople(); k++) {
+            if(upDown[k]) {
+                pplToPickup += to_string(k);
+            }
+        }
+    }
+    else {
+        for(int k = 0; k < floorToPickup.getNumPeople(); k++) {
+            if(!upDown[k]) {
+                pplToPickup += to_string(k);
+            }
+        }
+    }
+    return pplToPickup;
 }
