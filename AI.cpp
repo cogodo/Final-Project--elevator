@@ -42,6 +42,12 @@ string getAIMoveString(const BuildingState& buildingState) {
     if(availableElevators[0] == false && availableElevators[1] == false && availableElevators[2] == false) {
         return "";
             }
+    if(buildingState.elevators[0].currentFloor == buildingState.elevators[1].currentFloor && buildingState.elevators[1].currentFloor == buildingState.elevators[2].currentFloor && !buildingState.elevators[0].isServicing) {
+        return "e0f7";
+    }
+    if(buildingState.elevators[1].currentFloor == buildingState.elevators[2].currentFloor && !buildingState.elevators[1].isServicing) {
+        return "e1f4";
+    }
     for(int y = 0; y < 3; y++) {
         for(int m = 0; m < 10; m++) {
             int temp = 0;
@@ -58,12 +64,12 @@ string getAIMoveString(const BuildingState& buildingState) {
         }
     }
     
-    int hierarchy[10][3] = {0};
+    double hierarchy[10][3] = {0};
     
     for(int w = 0; w < 3; w++) {
         for(int x = 0; x < 10; x++) {
             for(int a = 0; a < 10; a++) {
-                if(availableElevators[w]) {
+
                     if(buildingState.floors[x].people[a].angerLevel == 9) {
                         hierarchy[x][w] += 100;
                     }
@@ -71,7 +77,7 @@ string getAIMoveString(const BuildingState& buildingState) {
                         hierarchy[x][w] += 40;
                     }
                     else if(buildingState.floors[x].people[a].angerLevel == 7) {
-                        hierarchy[x][w] += 30;
+                            hierarchy[x][w] += 30;
                     }
                     else if(buildingState.floors[x].people[a].angerLevel == 6) {
                         hierarchy[x][w] += 10;
@@ -79,6 +85,9 @@ string getAIMoveString(const BuildingState& buildingState) {
                     else {
                         hierarchy[x][w] += buildingState.floors[x].people[a].angerLevel;
                     }
+                //don't pick people up if there's only a few
+                if(buildingState.floors[x].numPeople < 5) {
+                    hierarchy[x][w] = 0;
                 }
             }
         }
@@ -86,9 +95,9 @@ string getAIMoveString(const BuildingState& buildingState) {
     
     for(int w = 0; w < 3; w++) {
         for(int x = 0; x < 10; x++) {
-            if(availableElevators[w]) {
+
                 hierarchy[x][w] = hierarchy[x][w] / ticksFromElevator[x][w];
-            }
+            
         }
     }
     
@@ -99,6 +108,7 @@ string getAIMoveString(const BuildingState& buildingState) {
         for(int j = 0; j < 10; j++) {
             if(availableElevators[i]) {
                 if(hierarchy[j][i] > maxVal) {
+                    //something for if the elevator is alr servicing- only go based off rows of elevators available for that turn
                     maxVal = hierarchy[j][i];
                     elevatorChoice = i;
                     floorChoice = j;
@@ -108,10 +118,14 @@ string getAIMoveString(const BuildingState& buildingState) {
     }
     
     move = "e" + to_string(elevatorChoice) + "f" + to_string(floorChoice);
+    //Probably change this, temp fix for start
+    if(move == "e0f0") {
+        return "";
+    }
     for(int i = 0; i < 3; i++) {
         if(!buildingState.elevators[i].isServicing) {
             //Target floor refers to target of previous people
-            if(buildingState.elevators[i].targetFloor == buildingState.elevators[i].currentFloor && buildingState.floors[buildingState.elevators[i].currentFloor].numPeople > 0) {
+            if(buildingState.elevators[i].targetFloor == buildingState.elevators[i].currentFloor && buildingState.floors[buildingState.elevators[i].currentFloor].numPeople > 4) {
                 //Won't work without people on floor 0 at start
                 return "e" + to_string(i) + "p";
             }
