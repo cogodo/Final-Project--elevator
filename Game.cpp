@@ -46,27 +46,18 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
 
         }
         while (true) {
-            /*int src = floorDist(gen);
-            int dst = floorDist(gen);
-            if (src != dst) {
-                std::stringstream ss;
-                ss << "0f" << src << "t" << dst << "a" << angerDist(gen);
-                Person p(ss.str());
-                building.spawnPerson(p);
-            }*/
 
             for (int i = 0; i < count; i++) {
-                if (people[i].getTurn() == building.getTime()) {
+                if (people[i].getTurn() == (building.getTime())) {
                     building.spawnPerson(people[i]);
                 }
             }
-
             building.prettyPrintBuilding(cout);
             satisfactionIndex.printSatisfaction(cout, false);
             checkForGameEnd();
 
-            //Move nextMove = getMove();
-            //update(nextMove);
+            Move nextMove = getAIMoveString(building.getBuildingState());
+            update(nextMove);
         }
     }
 
@@ -99,7 +90,7 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
         }
     }
 }
-
+   
 
 
 
