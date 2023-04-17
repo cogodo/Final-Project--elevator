@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2023 University of Michigan EECS183
  *
  * Game.cpp
@@ -35,8 +35,8 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     if (isAIMode) {
         Person people[999];
         string line = "";
-        int count = 0;
-        while (gameFile >> line) {
+                int count = 0;
+            while (gameFile >> line) {
             if (line.length() > 6) {
                 Person p(line);
                 people[count] = p;
@@ -46,18 +46,29 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
 
         }
         while (true) {
+            /*int src = floorDist(gen);
+            int dst = floorDist(gen);
+            if (src != dst) {
+                std::stringstream ss;
+                ss << "0f" << src << "t" << dst << "a" << angerDist(gen);
+                Person p(ss.str());
+                building.spawnPerson(p);
+            }*/
 
             for (int i = 0; i < count; i++) {
-                if (people[i].getTurn() == (building.getTime())) {
+                if (people[i].getTurn() == building.getTime()) {
                     building.spawnPerson(people[i]);
                 }
             }
+
             building.prettyPrintBuilding(cout);
             satisfactionIndex.printSatisfaction(cout, false);
             checkForGameEnd();
 
-            Move nextMove = getAIMoveString(building.getBuildingState());
+            Move nextMove = getMove();
             update(nextMove);
+            //Move nextMove = getMove();
+            //update(nextMove);
         }
     }
 
@@ -90,7 +101,7 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
         }
     }
 }
-   
+
 
 
 
